@@ -20,6 +20,7 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
+        "hemispheres": mars_hemispheres(browser),
         "last_modified": dt.datetime.now()
     }
 
@@ -95,6 +96,63 @@ def mars_facts():
 
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html()
+
+def mars_hemispheres(browser):
+    # 1. Use browser to visit the URL 
+    url = 'https://marshemispheres.com/'
+    browser.visit(url)
+
+    # 2. Create a list to hold the images and titles.
+    hemisphere_image_urls_first = []
+    titles_first = []
+    hemisphere_image_titles = []
+    hemisphere_image_urls_rel = []
+    hemisphere_image_urls = []
+    hemisphere_dict_list = []
+
+    # 3. Write code to retrieve the image urls and titles for each hemisphere.
+    html = browser.html
+    hemisphere_img_soup = soup(html, 'html.parser')
+
+    #Get html
+    results = hemisphere_img_soup.find_all('a', class_='itemLink product-item')
+    #results
+
+    for result in results:
+        hemisphere_img_url_rels = result['href']
+        hemisphere_image_urls_first.append(f'https://marshemispheres.com/{hemisphere_img_url_rels}')
+        
+        title_first = result.find('h3')
+        titles_first.append(title_first)
+
+    #PROVING THAT I HAVE THE URLs TO GET TO FULL RES IMAGES
+    hemisphere_image_urls_rel = [(hemisphere_image_urls_first[0]), (hemisphere_image_urls_first[2]), (hemisphere_image_urls_first[4]) ,(hemisphere_image_urls_first[6])]
+
+    #Getting only titles I want
+    hemisphere_image_titles = [(titles_first[1]), (titles_first[3]), (titles_first[5]), (titles_first[7])]
+
+    #Loop through the four correct urls to get the full res images
+    for url in hemisphere_image_urls_rel:
+        browser.visit(url)
+        #^^ CAN GET THE BROWSER TO LOOP THROUGH ALL URLS ABOVE BUT CAN'T GRAB THE FULL RES IMAGE SOURCES BELOW
+        html = browser.html
+        full_img_soup = soup(html, 'html.parser')
+        full_img_results = full_img_soup.find_all('a', text='Sample')
+        for result in full_img_results:
+            hemisphere_img_url_full = result['href']
+            hemisphere_image_urls.append(f'https://marshemispheres.com/{hemisphere_img_url_full}')
+    
+    #Creating Dictionary
+    for x in range(0,4):
+        
+        hemisphere_dict = {'image_url': hemisphere_image_urls[x],
+                        'title': hemisphere_image_titles[x].text}
+        hemisphere_dict_list.append(hemisphere_dict)
+
+    # 4. Print the list that holds the dictionary of each image url and title.
+    return hemisphere_dict_list
+
+    
 
 if __name__ == "__main__":
 
